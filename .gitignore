@@ -1,0 +1,6 @@
+**/*cache*
+**/*.log
+**/*.zip
+**/*.pth
+.idea/
+.vscode/
