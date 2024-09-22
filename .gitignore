@@ -4,3 +4,6 @@
 **/*.pth
 .idea/
 .vscode/
+**/*build/
+camera/csource/RGBDSaver
+**/Log/
