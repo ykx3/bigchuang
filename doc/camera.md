@@ -8,7 +8,7 @@
 - **process**: 启动的外部 C++ 程序的 `subprocess.Popen` 对象，用于控制 RGBD 图像的捕获。
 
 #### 构造函数
-- **__init__(fps=10.0)**: 初始化 `RGBDCamera` 实例，设置图像捕获的帧率。参数 `fps` 定义每秒捕获的帧数，默认值为 10.0 帧/秒。
+- **__init__()**: 初始化 `RGBDCamera` 实例。
 
 #### 方法
 - **get_frame()**: 获取最新的彩色图像和深度图像对。如果找不到匹配的图像对，则返回 `(None, None)`。
@@ -20,7 +20,9 @@
 
 #### 使用示例
 ```python
-camera = RGBDCamera(fps=30.0)
+from camera import *
+
+camera = RGBDCamera()
 
 # 获取一帧图像
 color_image, depth_image = camera.get_frame()

@@ -4,4 +4,7 @@
 参见[here](doc/coppeliasim.md)
 
 ## 机器人运动
-参加[here](doc/copwrap.md)
+参见[here](doc/copwrap.md)
+
+## 相机
+参见[here](doc/camera.md)

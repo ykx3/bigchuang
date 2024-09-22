@@ -11,12 +11,9 @@ class RGBDCamera:
     注：应该是单例对象
     """
 
-    def __init__(self, fps=10.0):
+    def __init__(self):
         """
-        初始化 RGBDCamera 实例，设置图像捕获的帧率。
-
-        Args:
-            fps (float): 每秒捕获的帧数，默认值为 10.0 帧/秒。
+        初始化 RGBDCamera 实例。
         """
         self.image_path = os.path.join(os.path.realpath(__file__)[:-10], 'image_cache')
         if not os.path.exists(self.image_path):
@@ -35,8 +32,8 @@ class RGBDCamera:
         depth_path = f'{self.image_path}/Depth_0.png'
         color_image = read_color_image(color_path)
         depth_image = read_depth_image(depth_path)
-        # os.remove(color_path)
-        # os.remove(depth_path)
+        os.remove(color_path)
+        os.remove(depth_path)
         return color_image, depth_image
 
     def get_depth(self):

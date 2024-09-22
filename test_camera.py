@@ -1,7 +1,7 @@
 import time
 import matplotlib.pyplot as plt
 from camera import RGBDCamera
-camera = RGBDCamera(fps=10)
+camera = RGBDCamera()
 color, depth = camera.get_frame()
 if color is not None:
     plt.imshow(color)
