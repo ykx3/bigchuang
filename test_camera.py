@@ -9,9 +9,11 @@ if color is not None:
 if depth is not None:
     plt.imshow(depth)
     plt.show()
-# cnt = 0
-# for i in range(10):
-#     time.sleep(0.1)
-#     a, b = camera.get_frame()
-#     cnt += a is None or b is None
-# print(cnt)
+cnt = 0
+start = time.time()
+for i in range(10):
+    a, b = camera.get_frame()
+    cnt += a is None or b is None
+end = time.time()
+print(cnt)
+print(end - start)

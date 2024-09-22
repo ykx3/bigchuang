@@ -33,6 +33,7 @@ make -j$(nproc) || {
   exit 1
 }
 
+rm ../RGBDSaver
 cp bin/RGBDSaver ..
 echo "Build completed successfully."
 

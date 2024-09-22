@@ -34,13 +34,6 @@ void saveColor(std::shared_ptr<ob::ColorFrame> colorFrame, int index) {
 }
 
 int main(int argc, char **argv) try {
-    int sleep_seconds;
-    try {
-        // 将命令行参数转换为整数
-        sleep_seconds = std::stoi(argv[1]);
-    }catch(std::exception e) {
-        sleep_seconds = 0.1;
-    }
     // create pipeline
     ob::Pipeline pipeline;
     // Configure which streams to enable or disable for the Pipeline by creating a Config
@@ -96,7 +89,7 @@ int main(int argc, char **argv) try {
         auto colorFrame = frameset->colorFrame();
         auto depthFrame = frameset->depthFrame();
 
-        if(colorFrame != nullptr && colorCount < 5) {
+        if(colorFrame != nullptr && colorCount < 1) {
             // save the colormap
             if(colorFrame->format() != OB_FORMAT_RGB) {
                 if(colorFrame->format() == OB_FORMAT_MJPG) {
@@ -120,17 +113,15 @@ int main(int argc, char **argv) try {
             colorCount++;
         }
 
-        if(depthFrame != nullptr && depthCount < 5) {
+        if(depthFrame != nullptr && depthCount < 1) {
             // save the depth map
             saveDepth(depthFrame, depthCount);
             depthCount++;
         }
 
         // Press the ESC key to exit the program when both the color image and the depth image are saved 5
-        if(depthCount == 5 && (colorCount == 5 || colorCount == -1)) {
-            depthCount = 0;
-            colorCount = 0;
-            std::this_thread::sleep_for(std::chrono::milliseconds(1000 * sleep_seconds));
+        if(depthCount == 1 && (colorCount == 1 || colorCount == -1)) {
+            break;
         }
     }
     pipeline.stop();
