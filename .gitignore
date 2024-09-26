@@ -6,4 +6,5 @@
 .vscode/
 **/*build/
 camera/csource/RGBDSaver
+camera/csource/ParamentsGet
 **/Log/

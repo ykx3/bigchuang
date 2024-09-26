@@ -9,11 +9,14 @@ if color is not None:
 if depth is not None:
     plt.imshow(depth)
     plt.show()
-cnt = 0
-start = time.time()
-for i in range(10):
-    a, b = camera.get_frame()
-    cnt += a is None or b is None
-end = time.time()
-print(cnt)
-print(end - start)
+# cnt = 0
+# start = time.time()
+# for i in range(10):
+#     a, b = camera.get_frame()
+#     cnt += a is None or b is None
+# end = time.time()
+# print(cnt)
+# print(end - start)
+from camera.utils import *
+pcd = rgbd2cloud(depth, color, **camera.get_para())
+visualize_pcd(pcd)

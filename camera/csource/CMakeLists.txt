@@ -47,3 +47,8 @@ add_executable(RGBDSaver RGBDSaver.cpp)
 
 set_property(TARGET RGBDSaver PROPERTY CXX_STANDARD 11)
 target_link_libraries(RGBDSaver OrbbecSDK ${OpenCV_LIBS} )
+
+add_executable(ParamentsGet ParamentsGet.cpp)
+
+set_property(TARGET ParamentsGet PROPERTY CXX_STANDARD 11)
+target_link_libraries(ParamentsGet OrbbecSDK   )

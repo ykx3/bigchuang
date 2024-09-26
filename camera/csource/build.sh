@@ -32,10 +32,13 @@ make -j$(nproc) || {
   echo "Error: Build failed."
   exit 1
 }
-
-rm ../RGBDSaver
+if [ -e ../RGBDSaver ]; then
+  rm ../RGBDSaver
+fi
 cp bin/RGBDSaver ..
-echo "Build completed successfully."
 
-# 可选：运行生成的可执行文件
-# ./RGBDSaver
+if [ -e ../ParamentsGet ]; then
+  rm ../ParamentsGet
+fi
+cp bin/ParamentsGet ..
+echo "Build completed successfully."
