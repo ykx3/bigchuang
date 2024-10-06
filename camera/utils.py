@@ -30,7 +30,8 @@ def write_depth_image(path, depth_image):
 def write_pcd(path, pcd):
     o3d.io.write_point_cloud(path, pcd)
 
-def rgbd2cloud(depth_image, color_image, depth_scale = 0.001, fx=1656, fy=1656, cx=960, cy=540, no_color=False):
+
+def rgbd2cloud(depth_image, color_image, depth_scale=0.001, fx=1656, fy=1656, cx=960, cy=540, no_color=False):
     # fx, fy = 1656, 1656  # 焦距
     # cx, cy = 1920 / 2, 1080 / 2  # 主点
 
@@ -54,6 +55,7 @@ def rgbd2cloud(depth_image, color_image, depth_scale = 0.001, fx=1656, fy=1656, 
 
     return pcd
 
+
 def visualize_pcd(*pcds, point_size=10.0):
     # 创建一个可视化窗口
     vis = o3d.visualization.Visualizer()
@@ -70,3 +72,27 @@ def visualize_pcd(*pcds, point_size=10.0):
     # 运行可视化
     vis.run()
     vis.destroy_window()
+
+
+def get_rotation_matrix(axis, angle):
+    """返回绕指定轴旋转angle弧度的旋转矩阵"""
+    if axis == 'x':
+        return np.array([
+            [1, 0, 0],
+            [0, np.cos(angle), -np.sin(angle)],
+            [0, np.sin(angle), np.cos(angle)]
+        ])
+    elif axis == 'y':
+        return np.array([
+            [np.cos(angle), 0, np.sin(angle)],
+            [0, 1, 0],
+            [-np.sin(angle), 0, np.cos(angle)]
+        ])
+    elif axis == 'z':
+        return np.array([
+            [np.cos(angle), -np.sin(angle), 0],
+            [np.sin(angle), np.cos(angle), 0],
+            [0, 0, 1]
+        ])
+    else:
+        raise ValueError("Axis must be one of 'x', 'y', or 'z'")
