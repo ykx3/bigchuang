@@ -4,7 +4,7 @@ from inference.models.yolo_world.yolo_world import YOLOWorld
 from segment_anything import sam_model_registry, SamPredictor
 import matplotlib.pyplot as plt
 from .camera import RGBDCamera
-from .utils import rgbd2cloud
+from .utils import rgbd2cloud, get_largest_cluster
 
 
 class Processor:
@@ -45,4 +45,5 @@ class Processor:
             plt.imshow(mask, cmap='Reds', alpha=0.5)  # 使用 'Reds' 颜色映射来显示掩码
             plt.axis('off')  # 隐藏坐标轴
             plt.show()
+        pcd = get_largest_cluster(pcd)[0]
         return pcd

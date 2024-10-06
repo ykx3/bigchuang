@@ -34,40 +34,72 @@ void saveColor(std::shared_ptr<ob::ColorFrame> colorFrame, int index) {
 }
 
 int main(int argc, char **argv) try {
+    ob::Context::setLoggerSeverity(OB_LOG_SEVERITY_WARN);
     // create pipeline
     ob::Pipeline pipeline;
+    int colorCount = 0;
+    int depthCount = 0;
     // Configure which streams to enable or disable for the Pipeline by creating a Config
     std::shared_ptr<ob::Config> config = std::make_shared<ob::Config>();
 
-    int colorCount = 0;
-    int depthCount = 0;
+    // Turn on D2C alignment, which needs to be turned on when generating RGBD point clouds
+    std::shared_ptr<ob::VideoStreamProfile> colorProfile = nullptr;
+
     try {
         // Get all stream profiles of the color camera, including stream resolution, frame rate, and frame format
-        auto                                    colorProfiles = pipeline.getStreamProfileList(OB_SENSOR_COLOR);
-        std::shared_ptr<ob::VideoStreamProfile> colorProfile  = nullptr;
+        auto colorProfiles = pipeline.getStreamProfileList(OB_SENSOR_COLOR);
         if(colorProfiles) {
-            colorProfile = std::const_pointer_cast<ob::StreamProfile>(colorProfiles->getProfile(OB_PROFILE_DEFAULT))->as<ob::VideoStreamProfile>();
+            auto profile = colorProfiles->getProfile(OB_PROFILE_DEFAULT);
+            colorProfile = profile->as<ob::VideoStreamProfile>();
         }
         config->enableStream(colorProfile);
     }
     catch(ob::Error &e) {
-        // no Color Sensor
-        colorCount = -1;
+        config->setAlignMode(ALIGN_DISABLE);
         std::cerr << "Current device is not support color sensor!" << std::endl;
     }
 
     // Get all stream profiles of the depth camera, including stream resolution, frame rate, and frame format
-    auto                                    depthProfiles = pipeline.getStreamProfileList(OB_SENSOR_DEPTH);
-    std::shared_ptr<ob::VideoStreamProfile> depthProfile  = nullptr;
-    if(depthProfiles) {
-        depthProfile = std::const_pointer_cast<ob::StreamProfile>(depthProfiles->getProfile(OB_PROFILE_DEFAULT))->as<ob::VideoStreamProfile>();
+    std::shared_ptr<ob::StreamProfileList> depthProfileList;
+    OBAlignMode                            alignMode = ALIGN_DISABLE;
+    if(colorProfile) {
+        // Try find supported depth to color align hardware mode profile
+        depthProfileList = pipeline.getD2CDepthProfileList(colorProfile, ALIGN_D2C_HW_MODE);
+        if(depthProfileList->count() > 0) {
+            alignMode = ALIGN_D2C_HW_MODE;
+        }
+        else {
+            // Try find supported depth to color align software mode profile
+            depthProfileList = pipeline.getD2CDepthProfileList(colorProfile, ALIGN_D2C_SW_MODE);
+            if(depthProfileList->count() > 0) {
+                alignMode = ALIGN_D2C_SW_MODE;
+            }
+        }
     }
-    config->enableStream(depthProfile);
+    else {
+        depthProfileList = pipeline.getStreamProfileList(OB_SENSOR_DEPTH);
+    }
 
+    if(depthProfileList->count() > 0) {
+        std::shared_ptr<ob::StreamProfile> depthProfile;
+        try {
+            // Select the profile with the same frame rate as color.
+            depthProfile = depthProfileList->getVideoStreamProfile(OB_WIDTH_ANY, OB_HEIGHT_ANY, OB_FORMAT_ANY, colorProfile->fps());
+        }
+        catch(...) {
+            depthProfile = nullptr;
+        }
+
+        if(!depthProfile) {
+            // If no matching profile is found, select the default profile.
+            depthProfile = depthProfileList->getProfile(OB_PROFILE_DEFAULT);
+        }
+        config->enableStream(depthProfile);
+    }
+    config->setAlignMode(alignMode);
     // Create a format conversion Filter
     ob::FormatConvertFilter formatConvertFilter;
-
-    // Start the pipeline with config
+    // start pipeline with config
     pipeline.start(config);
 
     int frameCount = 0;

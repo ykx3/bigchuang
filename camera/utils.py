@@ -96,3 +96,48 @@ def get_rotation_matrix(axis, angle):
         ])
     else:
         raise ValueError("Axis must be one of 'x', 'y', or 'z'")
+
+
+def remove_outliers(pcd, nb_neighbors=20, std_ratio=2.0):
+    # 使用统计学方法去除离群点
+    cl, ind = pcd.remove_statistical_outlier(nb_neighbors=nb_neighbors, std_ratio=std_ratio)
+    return pcd.select_by_index(ind)
+
+
+def get_largest_cluster(pcd):
+    # 使用 DBSCAN 进行聚类
+    with o3d.utility.VerbosityContextManager(o3d.utility.VerbosityLevel.Error) as cm:
+        labels = np.array(pcd.cluster_dbscan(eps=0.04, min_points=20, print_progress=False))
+
+    # 计算每个类的点数
+    unique_labels, counts = np.unique(labels, return_counts=True)
+
+    # 移除背景的标签（如果存在），一般为-1
+    mask = unique_labels != -1
+    unique_labels = unique_labels[mask]
+    counts = counts[mask]
+
+    # 只有一个有效簇的情况，无第二大簇
+    if unique_labels.size < 2:
+        if unique_labels.size == 0:
+            return pcd, None
+        largest_cluster_pcd = pcd.select_by_index(np.where(labels == unique_labels[0])[0])
+        return remove_outliers(largest_cluster_pcd), None
+
+    # 找出第一和第二大簇的标签
+    sorted_indices = np.argsort(-counts)  # 对点数进行降序排序并返回索引
+    largest_label = unique_labels[sorted_indices[0]]
+    second_largest_label = unique_labels[sorted_indices[1]]
+
+    # 获取第一大簇的点云
+    largest_cluster_indices = np.where(labels == largest_label)[0]
+    largest_cluster_pcd = pcd.select_by_index(largest_cluster_indices)
+    largest_cluster_pcd = remove_outliers(largest_cluster_pcd)
+
+    # 获取第二大簇的点云
+    second_largest_cluster_indices = np.where(labels == second_largest_label)[0]
+    second_largest_cluster_pcd = pcd.select_by_index(second_largest_cluster_indices)
+    second_largest_cluster_pcd = remove_outliers(second_largest_cluster_pcd)
+    if len(largest_cluster_pcd.points) * 0.5 > len(second_largest_cluster_pcd.points):
+        return largest_cluster_pcd, None
+    return largest_cluster_pcd, second_largest_cluster_pcd
